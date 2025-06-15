@@ -1,5 +1,4 @@
 using Catalog.API.Dtos;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.Dtos;
 
 namespace Catalog.API.Services

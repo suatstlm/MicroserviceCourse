@@ -2,7 +2,6 @@ using AutoMapper;
 using Catalog.API.Dtos;
 using Catalog.API.Models;
 using Catalog.API.Settings;
-using Microsoft.AspNetCore.Http.HttpResults;
 using MongoDB.Driver;
 using Shared.Dtos;
 
@@ -86,7 +85,7 @@ namespace Catalog.API.Services
 
             if (result == null)
             {
-                return Response<NoContent>.Fail("Course not found", 404);
+                return Response<Shared.Dtos.NoContent>.Fail("Course not found", 404);
             }
 
             return Response<NoContent>.Success(204);

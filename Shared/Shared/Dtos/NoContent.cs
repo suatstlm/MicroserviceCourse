@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Dtos
 {
-    public class NoConten
+    public class NoContent
     {
     }
 }
