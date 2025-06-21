@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.Dtos;
 using System.Threading.Tasks;
 using static Duende.IdentityServer.IdentityServerConstants;
+using System.Linq;
+using IdentityModel;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace IdentityServer.Controllers
 {
@@ -39,6 +42,33 @@ namespace IdentityServer.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUser()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub);
+
+            if (userIdClaim == null)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByIdAsync(userIdClaim.Value);
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var userDto = new UserRespnseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email
+            };
+
+            return Ok(Response<UserRespnseDto>.Success(userDto, 200));
         }
     }
 }

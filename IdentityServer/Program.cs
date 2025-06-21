@@ -21,26 +21,59 @@ try
         .Enrich.FromLogContext()
         .ReadFrom.Configuration(ctx.Configuration));
 
+    Log.Information("Building application...");
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
 
+    Log.Information("Running database migrations...");
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        dbContext.Database.Migrate();
+        try
+        {
+            dbContext.Database.Migrate();
+            Log.Information("Database migrations completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error during database migration");
+            throw;
+        }
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        if (!userManager.Users.Any())
+        try
         {
-             userManager.CreateAsync(
-                new ApplicationUser
+            if (!userManager.Users.Any())
+            {
+                Log.Information("Creating default user...");
+                var result = await userManager.CreateAsync(
+                    new ApplicationUser
+                    {
+                        UserName = "Suat",
+                        Email = "suatstlm41@gmail.com",
+                    }, "1234");
+                
+                if (result.Succeeded)
                 {
-                    UserName = "Suat",
-                    Email = "suatstlm41@gmail.com",
-                }, "1234").Wait();
+                    Log.Information("Default user created successfully");
+                }
+                else
+                {
+                    Log.Error("Failed to create default user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
+            }
+            else
+            {
+                Log.Information("Users already exist in database");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error during user creation");
+            throw;
         }
     }
 
@@ -54,11 +87,12 @@ try
     //    return;
     //}
 
+    Log.Information("Starting application...");
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)
 {
-    Log.Fatal(ex, "Unhandled exception");
+    Log.Fatal(ex, "Unhandled exception during startup");
 }
 finally
 {
