@@ -16,7 +16,6 @@ namespace IdentityServer.Services
 
         public async Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
         {
-            // Find user by email
             var user = await _userManager.FindByEmailAsync(context.UserName);
             
             if (user == null)
@@ -27,7 +26,6 @@ namespace IdentityServer.Services
                 return;
             }
 
-            // Validate password
             var passwordCheck = await _userManager.CheckPasswordAsync(user, context.Password);
             
             if (!passwordCheck)
@@ -38,10 +36,8 @@ namespace IdentityServer.Services
                 return;
             }
 
-            // Get user claims
             var userClaims = await _userManager.GetClaimsAsync(user);
             
-            // Add standard identity claims
             var claims = new List<Claim>
             {
                 new Claim("sub", user.Id),
@@ -51,21 +47,17 @@ namespace IdentityServer.Services
                 new Claim("username", user.UserName ?? "")
             };
 
-            // Add custom claims
             claims.Add(new Claim("country", "Turkey"));
             claims.Add(new Claim("subscriptionlevel", "premium"));
             
-            // Add user roles as claims
             var userRoles = await _userManager.GetRolesAsync(user);
             foreach (var role in userRoles)
             {
                 claims.Add(new Claim("role", role));
             }
 
-            // Add existing user claims
             claims.AddRange(userClaims);
 
-            // If validation succeeds, create the result with user claims
             context.Result = new GrantValidationResult(
                 user.Id.ToString(),
                 "password",
