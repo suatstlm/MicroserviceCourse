@@ -1,2 +1,4 @@
 Services
  -CatalogApi -- 5011
+ -PhotoStockApi -- 5012
+IdetitrServiceApi --5001
